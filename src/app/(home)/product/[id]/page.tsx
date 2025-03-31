@@ -1,5 +1,6 @@
 "use client"
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { 
   Container, 
   Grid, 
@@ -15,68 +16,43 @@ import {
   ImageList,
   ImageListItem
 } from '@mui/material';
-import { GetServerSideProps } from 'next';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import { useCart } from 'react-use-cart';
+import { mockProducts, Product } from '@/prisma/data';
+import { useParams } from 'next/navigation';
 
-// Product Interface
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  images: string[];
-  rating: number;
-  inStock: boolean;
-  discount?: number;
-  specifications: { [key: string]: string };
-  variants?: { 
-    color?: string; 
-    size?: string; 
-    price?: number 
-  }[];
-}
-
-// Mock Product Data (replace with actual API call)
-const mockProduct: Product = {
-  id: '1',
-  name: 'High-Performance Auto Part',
-  price: 299.99,
-  description: 'Advanced automotive component designed for optimal performance and durability. Engineered with precision to enhance your vehicle\'s efficiency and reliability.',
-  images: [
-    'https://placehold.co/600x400?text=product1',
-    'https://placehold.co/600x400?text=product2',
-    'https://placehold.co/600x400?text=product3'
-  ],
-  rating: 4.5,
-  inStock: true,
-  discount: 15,
-  specifications: {
-    'Material': 'High-Grade Aluminum',
-    'Compatibility': 'Universal Fit',
-    'Warranty': '2 Years',
-    'Weight': '2.5 kg'
-  },
-  variants: [
-    { color: 'Silver', size: 'Standard' },
-    { color: 'Black', size: 'Large' }
-  ]
-};
-
-const ProductDetailsPage: React.FC = () => {
-  const [selectedImage, setSelectedImage] = useState(mockProduct.images[0]);
+const ProductDetailsPage = () => {
+  const params = useParams();
+  const id = params.id as string;
+  
+  // Find the product from mock data using the ID from the URL
+  const product = mockProducts.find(product => product.id === id);
+  
+  // Handle case where product is not found
+  if (!product) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography variant="h4">Product not found</Typography>
+      </Container>
+    );
+  }
+  
+  const [selectedImage, setSelectedImage] = useState(product.images[0]);
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+
+  const { addItem, getItem } = useCart();
 
   const handleVariantChange = (event: SelectChangeEvent) => {
     setSelectedVariant(Number(event.target.value));
   };
 
   const calculateDiscountedPrice = () => {
-    const originalPrice = mockProduct.price;
-    return mockProduct.discount 
-      ? originalPrice * (1 - mockProduct.discount / 100) 
+    const originalPrice = product.price;
+    return product.discount 
+      ? originalPrice * (1 - product.discount / 100) 
       : originalPrice;
   };
 
@@ -93,7 +69,7 @@ const ProductDetailsPage: React.FC = () => {
             {/* Main Image */}
             <img 
               src={selectedImage} 
-              alt={mockProduct.name}
+              alt={product.name}
               style={{
                 width: '100%',
                 height: '100%',
@@ -118,9 +94,9 @@ const ProductDetailsPage: React.FC = () => {
             </Button>
 
             {/* Discount Chip */}
-            {mockProduct.discount && (
+            {product.discount && (
               <Chip 
-                label={`-${mockProduct.discount}%`} 
+                label={`-${product.discount}%`} 
                 color="error" 
                 sx={{ 
                   position: 'absolute', 
@@ -139,7 +115,7 @@ const ProductDetailsPage: React.FC = () => {
             }} 
             cols={3}
           >
-            {mockProduct.images.map((img) => (
+            {product.images.map((img) => (
               <ImageListItem 
                 key={img}
                 onClick={() => setSelectedImage(img)}
@@ -165,22 +141,22 @@ const ProductDetailsPage: React.FC = () => {
         {/* Product Details */}
         <Grid item xs={12} md={6}>
           <Typography variant="h4" gutterBottom>
-            {mockProduct.name}
+            {product.name}
           </Typography>
 
           {/* Rating and Stock */}
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Rating 
-              value={mockProduct.rating} 
+              value={product.rating} 
               precision={0.5} 
               readOnly 
             />
             <Typography variant="body2" sx={{ ml: 2 }}>
-              ({mockProduct.rating} de 5)
+              ({product.rating} de 5)
             </Typography>
             <Chip 
-              label={mockProduct.inStock ? "Em Estoque" : "Esgotado"}
-              color={mockProduct.inStock ? "success" : "error"}
+              label={product.inStock ? "Em Estoque" : "Esgotado"}
+              color={product.inStock ? "success" : "error"}
               size="small"
               sx={{ ml: 2 }}
             />
@@ -195,7 +171,7 @@ const ProductDetailsPage: React.FC = () => {
             >
               R$ {calculateDiscountedPrice().toFixed(2)}
             </Typography>
-            {mockProduct.discount && mockProduct.discount > 0 && (
+            {product.discount && product.discount > 0 && (
               <Typography 
                 variant="body2" 
                 sx={{ 
@@ -203,13 +179,13 @@ const ProductDetailsPage: React.FC = () => {
                   color: 'gray' 
                 }}
               >
-                R$ {mockProduct.price.toFixed(2)}
+                R$ {product.price.toFixed(2)}
               </Typography>
             )}
           </Box>
 
           {/* Variants Selector */}
-          {mockProduct.variants && (
+          {product.variants && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1" gutterBottom>
                 Variante
@@ -219,7 +195,7 @@ const ProductDetailsPage: React.FC = () => {
                 value={selectedVariant.toString()}
                 onChange={handleVariantChange}
               >
-                {mockProduct.variants.map((variant, index) => (
+                {product.variants.map((variant, index) => (
                   <MenuItem key={index} value={index}>
                     {variant.color} - {variant.size}
                   </MenuItem>
@@ -230,7 +206,7 @@ const ProductDetailsPage: React.FC = () => {
 
           {/* Description */}
           <Typography variant="body1" paragraph>
-            {mockProduct.description}
+            {product.description}
           </Typography>
 
           {/* Specifications */}
@@ -238,7 +214,7 @@ const ProductDetailsPage: React.FC = () => {
           <Typography variant="h6" gutterBottom>
             Especificações
           </Typography>
-          {Object.entries(mockProduct.specifications).map(([key, value]) => (
+          {Object.entries(product.specifications).map(([key, value]) => (
             <Box 
               key={key} 
               sx={{ 
@@ -261,8 +237,9 @@ const ProductDetailsPage: React.FC = () => {
               color="primary" 
               size="large" 
               fullWidth
-              disabled={!mockProduct.inStock}
+              disabled={!product.inStock}
               startIcon={<LocalShippingIcon />}
+              onClick={() => addItem(product, 1)}
             >
               Adicionar ao Carrinho
             </Button>
@@ -270,7 +247,7 @@ const ProductDetailsPage: React.FC = () => {
               variant="outlined" 
               color="primary" 
               size="large"
-              disabled={!mockProduct.inStock}
+              disabled={!product.inStock}
             >
               Comprar Agora
             </Button>
@@ -280,16 +257,5 @@ const ProductDetailsPage: React.FC = () => {
     </Container>
   );
 };
-/*
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id } = context.params || {};
 
-  // In a real application, fetch product details based on ID
-  return {
-    props: {
-      product: mockProduct
-    }
-  };
-};
-*/
 export default ProductDetailsPage;

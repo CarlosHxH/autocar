@@ -1,9 +1,13 @@
-import { PrismaClient } from '@prisma/client';
+
+//import { prisma } from '@/prisma';
 import bcrypt from 'bcryptjs'
+
+const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-async function main() {/*
+async function main() {
+  // Only include fields that match your schema
   const user = await prisma.user.upsert({
     where: { email: 'admin@prisma.io' },
     update: {
@@ -19,7 +23,7 @@ async function main() {/*
       role: 'ADMIN',
     },
   })
-  console.log({ user })*/
+
   // Clear existing data to avoid duplicates (optional)
   await prisma.productVariant.deleteMany({});
   await prisma.productSpecification.deleteMany({});
@@ -252,13 +256,15 @@ async function main() {/*
   }
 
   console.log('Seed completed successfully');
+  console.log({ user })
 }
 
 main()
-  .catch((e) => {
-    console.error('Error during seeding:', e);
-    process.exit(1);
+  .then(async () => {
+    await prisma.$disconnect()
   })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .catch(async (e) => {
+    console.error('Error during seeding:', e);
+    await prisma.$disconnect()
+    process.exit(1)
+})

@@ -18,6 +18,9 @@
     "lint:check:fix:ci": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0 --fix --cache --cache-location .eslintcache",
     "clear": "rd /s /q .next"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@emotion/cache": "^11",
     "@emotion/react": "^11",
@@ -41,12 +44,18 @@
     "react-use-cart": "^1.14.0"
   },
   "devDependencies": {
+    "@prisma/client": "^6.5.0",
     "@types/bcryptjs": "^3.0.0",
-    "@types/node": "^20.17.28",
+    "@types/node": "^22.13.14",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "add": "^2.0.6",
+    "and": "^0.0.3",
     "eslint": "^8",
     "eslint-config-next": "^15",
-    "typescript": "^5"
+    "prisma": "^6.5.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2",
+    "yarn": "^1.22.22"
   }
 }

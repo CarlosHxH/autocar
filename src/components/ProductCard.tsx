@@ -10,6 +10,7 @@ interface ProductCardProps {
   discount?: number;
   inStock: boolean;
   onBuyClick?: () => void;
+  onDetailsClick?: () => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -19,14 +20,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
   rating,
   discount = 0,
   inStock,
-  onBuyClick
+  onBuyClick,
+  onDetailsClick
 }) => {
   const originalPrice = discount > 0 
     ? price / (1 - (discount / 100)) 
     : price;
-
   return (
-    <Card 
+    <Card
       sx={{
         width: '100%',
         maxWidth: 300,
@@ -64,6 +65,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           objectFit: 'contain', 
           backgroundColor: '#f5f5f5' 
         }}
+        onClick={onDetailsClick}
       />
       
       <CardContent>

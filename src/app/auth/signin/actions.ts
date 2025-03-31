@@ -10,6 +10,12 @@ async function signIn(provider: AuthProvider, formData: FormData, callbackUrl?: 
       redirectTo: callbackUrl ?? '/',
     });
   } catch (error) {
+    if(error instanceof AuthError) {
+      return {
+        error: 'Usuário ou senha inválidos',
+        type: 'CredentialsSignin',
+      };
+    }
     // The desired flow for successful sign in in all cases
     // and unsuccessful sign in for OAuth providers will cause a `redirect`,
     // and `redirect` is a throwing function, so we need to re-throw

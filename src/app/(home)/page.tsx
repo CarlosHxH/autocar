@@ -1,6 +1,6 @@
 import * as React from 'react';
-import DashboardContent from './DashboardContent';
+import HomeContent from './HomeContent';
 
 export default function Dashboard() {
-  return <DashboardContent />;
+  return <HomeContent />;
 }

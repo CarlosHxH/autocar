@@ -11,15 +11,31 @@ import { mockProducts } from '@/prisma/data';
 import Slideshow from '@/src/components/Slideshow';
 import AutoPartsCards from '@/src/components/AutoPartsCards';
 import { useCart } from 'react-use-cart';
+import ProductCarousel from '@/src/components/ProductCarousel';
+import Container from '@mui/material/Container';
+import SearchBar from '@/src/components/SearchBar';
 
-export default function DashboardContent() {
+
+export default function HomeContent() {
   const router = useRouter();
   const { addItem } = useCart();
 
   return (
     <Box>
-      <Slideshow/>
-      <AutoPartsCards/>
+
+      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+        <SearchBar
+          products={mockProducts}
+          placeholder="Buscar produtos, categorias, códigos..."
+        />
+      </Box>
+
+      <Slideshow />
+      <AutoPartsCards />
+
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <ProductCarousel products={mockProducts} title="Peças em Promoção" />
+      </Container>
 
       <Box sx={{ display: 'flex' }}>
         <Box
@@ -42,16 +58,10 @@ export default function DashboardContent() {
             }}
           >
             <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
-              {/* cards */}
               <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-                Promoções
+                Produtos
               </Typography>
               <Grid container spacing={2} columns={12} sx={{ mb: (theme) => theme.spacing(2) }}>
-              </Grid>
-              <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-                Details
-              </Typography>
-              <Grid container spacing={2} columns={12}>
                 {mockProducts && mockProducts.map((product, index) => (
                   <Grid size={{ xs: 12, md: 3 }} key={index}>
                     <ProductCard
@@ -62,11 +72,11 @@ export default function DashboardContent() {
                       discount={product.discount}
                       imageUrl={product.image}
                       onBuyClick={() => addItem(product)}
+                      onDetailsClick={() => router.push(`/product/${product.id}`)}
                     />
                   </Grid>))
                 }
-                <Stack gap={2} direction={{ xs: 'column', sm: 'row' }}>
-                </Stack>
+                <Stack gap={2} direction={{ xs: 'column', sm: 'row' }}></Stack>
               </Grid>
             </Box>
           </Stack>
