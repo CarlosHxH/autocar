@@ -1,0 +1,52 @@
+{
+  "name": "auth-nextjs-themed",
+  "version": "0.1.0",
+  "scripts": {
+    "d": "next dev -p 80",
+    "dev": "next dev",
+    "start": "next start",
+    "build": "next build",
+    "lint": "next lint",
+    "clean": "rimraf .next",
+    "test": "jest --watchAll=false --passWithNoTests --detectOpenHandles --forceExit",
+    "test:ci": "jest --passWithNoTests --detectOpenHandles --forceExit",
+    "test:coverage": "jest --passWithNoTests --detectOpenHandles --forceExit --coverage",
+    "cls": "rd /s /q .next && rd /s /q out && rd /s /q coverage && rd /s /q node_modules && rd /s /q .turbo && rd /s /q .cache",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "lint:check": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0",
+    "lint:check:fix": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0 --fix",
+    "lint:check:fix:ci": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0 --fix --cache --cache-location .eslintcache",
+    "clear": "rd /s /q .next"
+  },
+  "dependencies": {
+    "@emotion/cache": "^11",
+    "@emotion/react": "^11",
+    "@emotion/styled": "^11",
+    "@mui/icons-material": "^6",
+    "@mui/material": "^6",
+    "@mui/material-nextjs": "^6",
+    "@mui/x-charts": "^7",
+    "@mui/x-data-grid": "^7",
+    "@mui/x-date-pickers": "^7",
+    "@mui/x-tree-view": "^7",
+    "@react-spring/web": "^9",
+    "@toolpad/core": "^0.12.0",
+    "bcryptjs": "^3.0.2",
+    "clsx": "^2",
+    "dayjs": "^1",
+    "next": "^15",
+    "next-auth": "^5.0.0-beta.25",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-use-cart": "^1.14.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^3.0.0",
+    "@types/node": "^20.17.28",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^8",
+    "eslint-config-next": "^15",
+    "typescript": "^5"
+  }
+}
