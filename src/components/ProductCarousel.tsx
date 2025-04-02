@@ -1,14 +1,14 @@
 "use client";
 // components/ProductCarousel.tsx
 import React, { useRef } from 'react';
-import { Box, Typography, Card, CardContent, CardMedia, Button, IconButton } from '@mui/material';
+import { Box, Typography, Card, CardContent, CardMedia, Button, IconButton, Chip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
-import { type Product } from '@/prisma/data';
 import { useRouter } from 'next/navigation';
 import { useCart } from 'react-use-cart';
+import { type Product } from '@prisma/client';
 
 // Interface para as props do componente
 interface ProductCarouselProps {
@@ -87,7 +87,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, title = "Pr
       <Typography variant="h5" component="h2" sx={{ mb: 2, fontWeight: 'bold' }}>
         {title}
       </Typography>
-      
+
       <NavButton
         onClick={scrollLeft}
         sx={{ left: 5 }}
@@ -95,14 +95,16 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, title = "Pr
       >
         <NavigateBeforeIcon />
       </NavButton>
-      
+
       <ProductContainer ref={containerRef}>
         {products.map((product) => (
           <ProductCard key={product.id} onClick={() => router.push(`/product/${product.id}`)}>
+            {/* Discount Chip */}
+            
             <CardMedia
               component="img"
               height="160"
-              image={product.image}
+              image={product.mainImage}
               alt={product.name}
               sx={{ objectFit: 'contain', backgroundColor: '#f5f5f5', p: 1 }}
             />
@@ -119,8 +121,8 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, title = "Pr
               <Typography variant="h6" color="primary" sx={{ mb: 1 }}>
                 R$ {product.price.toFixed(2)}
               </Typography>
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 color="primary"
                 startIcon={<ShoppingCartIcon />}
                 fullWidth
@@ -132,7 +134,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, title = "Pr
           </ProductCard>
         ))}
       </ProductContainer>
-      
+
       <NavButton
         onClick={scrollRight}
         sx={{ right: 5 }}

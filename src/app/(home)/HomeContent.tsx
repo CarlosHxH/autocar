@@ -7,25 +7,42 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import ProductCard from '@/src/components/ProductCard';
 import { useRouter } from 'next/navigation';
-import { mockProducts } from '@/prisma/data';
 import Slideshow from '@/src/components/Slideshow';
 import AutoPartsCards from '@/src/components/AutoPartsCards';
 import { useCart } from 'react-use-cart';
 import ProductCarousel from '@/src/components/ProductCarousel';
 import Container from '@mui/material/Container';
 import SearchBar from '@/src/components/SearchBar';
+import useSWR from 'swr';
+import { type Product } from '@prisma/client';
 
+const fetchProducts = async () => {
+  const response = await fetch('/api');
+  const data = await response.json();
+  console.log(data);
+  return data;
+}
 
 export default function HomeContent() {
+  const { data:products, isLoading } = useSWR('/api', fetchProducts, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateIfStale: false,
+    //revalidateOnMount: false,
+  });
+
   const router = useRouter();
   const { addItem } = useCart();
+
+  if(isLoading) return <div>Loading...</div>
+  if(!products) return <div>No products found</div>
 
   return (
     <Box>
 
       <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
         <SearchBar
-          products={mockProducts}
+          products={products}
           placeholder="Buscar produtos, categorias, códigos..."
         />
       </Box>
@@ -34,7 +51,7 @@ export default function HomeContent() {
       <AutoPartsCards />
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <ProductCarousel products={mockProducts} title="Peças em Promoção" />
+        <ProductCarousel products={products} title="Peças em Promoção" />
       </Container>
 
       <Box sx={{ display: 'flex' }}>
@@ -62,19 +79,19 @@ export default function HomeContent() {
                 Produtos
               </Typography>
               <Grid container spacing={2} columns={12} sx={{ mb: (theme) => theme.spacing(2) }}>
-                {mockProducts && mockProducts.map((product, index) => (
-                  <Grid size={{ xs: 12, md: 3 }} key={index}>
+                {products && products.map((product: Product ) => (
                     <ProductCard
+                      key={product.id}
                       name={product.name}
                       price={product.price}
                       rating={product.rating}
                       inStock={true}
                       discount={product.discount}
-                      imageUrl={product.image}
+                      imageUrl={product.mainImage}
                       onBuyClick={() => addItem(product)}
                       onDetailsClick={() => router.push(`/product/${product.id}`)}
                     />
-                  </Grid>))
+                  ))
                 }
                 <Stack gap={2} direction={{ xs: 'column', sm: 'row' }}></Stack>
               </Grid>

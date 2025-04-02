@@ -1,38 +1,29 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
- 
 generator client {
   provider = "prisma-client-js"
 }
 
-enum Role {
-  CUSTOMER
-  USER
-  ADMIN
-  SUPERADMIN
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
   id            String          @id @default(cuid())
-  name          String?
   email         String          @unique
+  name          String?
+  createdAt     DateTime        @default(now())
   emailVerified DateTime?
   image         String?
-  password      String?
+  updatedAt     DateTime        @updatedAt
   role          Role            @default(CUSTOMER)
+  password      String?
   accounts      Account[]
-  sessions      Session[]
-  // Optional for WebAuthn support
-  Authenticator Authenticator[]
   addresses     Address[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  Order Order[]
+  Authenticator Authenticator[]
+  Order         Order[]
+  sessions      Session[]
 }
- 
+
 model Account {
   userId            String
   type              String
@@ -45,34 +36,30 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@id([provider, providerAccountId])
 }
- 
+
 model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
- 
+
 model VerificationToken {
   identifier String
   token      String
   expires    DateTime
- 
+
   @@id([identifier, token])
 }
- 
-// Optional for WebAuthn support
+
 model Authenticator {
   credentialID         String  @unique
   userId               String
@@ -82,104 +69,120 @@ model Authenticator {
   credentialDeviceType String
   credentialBackedUp   Boolean
   transports           String?
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@id([userId, credentialID])
 }
 
-
 model Product {
-  id              String                @id
-  name            String
-  price           Float
-  description     String
-  mainImage       String
-  rating          Float
-  inStock         Boolean               @default(true)
-  discount        Int                   @default(0)
-  category        String?
-  code            String?
-  isPromotion     Boolean               @default(false)
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
-  
-  // Relations
-  specifications  ProductSpecification[]
-  variants        ProductVariant[]
+  id               String                 @id
+  name             String
+  price            Float
+  description      String
+  category         String?
+  code             String?
+  rating           Float
+  inStock          Boolean                @default(true)
+  discount         Int                    @default(0)
+  isPromotion      Boolean                @default(false)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  mainImage        String
+  OrderItem        OrderItem[]
   additionalImages ProductImage[]
-
-  OrderItem OrderItem[]
+  specifications   ProductSpecification[]
+  variants         ProductVariant[]
 }
 
 model ProductSpecification {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   key       String
   value     String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model ProductVariant {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   color     String
   size      String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model ProductImage {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   url       String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
-
 model Address {
-  id            String   @id @default(uuid())
-  userId        String
-  street        String
-  number        String
-  complement    String?
-  neighborhood  String
-  city          String
-  state         String
-  country       String
-  zipCode       String
-  isDefault     Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Order Order[]
+  id           String   @id @default(uuid())
+  userId       String
+  street       String
+  number       String
+  complement   String?
+  neighborhood String
+  city         String
+  state        String
+  country      String
+  zipCode      String
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Order        Order[]
 }
 
 model OrderItem {
-  id            String   @id @default(uuid())
-  orderId       String
-  productId     String
-  quantity      Int
-  price         Float
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id        String   @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  discount  Int
+  total     Float
+  description String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
-
-
 model Order {
-  id            String   @id @default(uuid())
-  userId        String
-  addressId     String
-  totalAmount   Float
-  status        String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String      @id @default(uuid())
+  userId      String
+  addressId   String
+  totalAmount Float
+  status      OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  address     Address     @relation(fields: [addressId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  OrderItem   OrderItem[]
+}
 
-  OrderItem OrderItem[]
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  address Address @relation(fields: [addressId], references: [id], onDelete: Cascade)
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum Role {
+  CUSTOMER
+  USER
+  ADMIN
+  SUPERADMIN
+}
+
+model BannerImages {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  images      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

@@ -4,6 +4,9 @@ import type { Provider } from 'next-auth/providers';
 import bcrypt from 'bcryptjs';
 import { credencialSignin } from '@/prisma/data';
 import { AuthError } from 'next-auth';
+import { prisma } from './prisma';
+import { PrismaAdapter } from "@next-auth/prisma-adapter"
+
 
 const providers: Provider[] = [
   Credentials({
@@ -11,12 +14,14 @@ const providers: Provider[] = [
       email: { label: 'Email Address', type: 'email' },
       password: { label: 'Password', type: 'password' },
     },
-    authorize(c) {
-      const auth = credencialSignin(c.email);
-      if(!auth) throw new AuthError('Usuário não encontrado', {type: 'CredentialsSignin', message: 'Usuário não encontrado'});
-      const passwd = bcrypt.compareSync(c.password as string, auth?.password || '');
+    async authorize(c) {
+      const user = await prisma.user.findFirst({
+        where: { email: c.email as string}
+      });
+      if(!user) throw new AuthError('Usuário não encontrado', {type: 'CredentialsSignin', message: 'Usuário não encontrado'});
+      const passwd = bcrypt.compareSync(c.password as string, user?.password || '');
       if(!passwd) throw new AuthError('Senha inválida', {type: 'CredentialsSignin', message: 'Senha inválida'});
-      return auth;
+      return user;
     },
   }),
 ];
@@ -31,6 +36,7 @@ export const providerMap = providers.map((provider) => {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers,
+  adapter: PrismaAdapter(prisma),
   secret: process.env.AUTH_SECRET || 'KnTdIVqfwV2XlZJ0vLI5CHlW5iCfobiuk7hcHEyIhYE=',
   pages: { signIn: '/auth/signin' },
   callbacks: {

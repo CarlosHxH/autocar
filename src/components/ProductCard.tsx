@@ -152,15 +152,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
           >
             Comprar
           </Button>
-          
-          <Button 
-            variant="outlined" 
-            color="primary"
-            sx={{ minWidth: 'auto', px: 1 }}
-            size="small"
-          >
+{/*       
+          <Button variant="outlined" color="primary"sx={{ minWidth: 'auto', px: 1 }}size="small">
             <LocalShippingIcon fontSize="small" />
           </Button>
+*/}
         </Box>
       </CardContent>
     </Card>
