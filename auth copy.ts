@@ -21,22 +21,8 @@ const providers: Provider[] = [
       const passwd = bcrypt.compareSync(c.password as string, user?.password || '');
       if(!passwd) throw new AuthError('Senha inválida', {type: 'CredentialsSignin', message: 'Senha inválida'});
 
-      // Generate API token
-      const apiToken = jwt.sign(
-        { 
-          userId: user.id,
-          email: user.email,
-          role: user.role
-        },
-        process.env.AUTH_SECRET || 'KnTdIVqfwV2XlZJ0vLI5CHlW5iCfobiuk7hcHEyIhYE=',
-        { expiresIn: '30d' }
-      );
-      console.log({apiToken})
-      // Add API token to user object
-      return {
-        ...user,
-        apiToken
-      };
+      
+      return user;
     },
   }),
 ];
@@ -63,7 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     jwt({ token, user }) {
       if (user && 'role' in user) {
-        token.role = user.role;
+        token.role = user.role as string;
       }
       return token;
     },
@@ -71,7 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user = {
           ...session.user,
-          role: token.role
+          role: token.role as string
         } as any;
       }
       return session;

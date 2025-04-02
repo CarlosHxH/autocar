@@ -152,7 +152,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           >
             Comprar
           </Button>
-          
+{/*
           <Button 
             variant="outlined" 
             color="primary"
@@ -161,6 +161,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           >
             <LocalShippingIcon fontSize="small" />
           </Button>
+*/}
         </Box>
       </CardContent>
     </Card>

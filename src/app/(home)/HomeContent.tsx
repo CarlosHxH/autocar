@@ -15,7 +15,6 @@ import ProductCarousel from '@/src/components/ProductCarousel';
 import Container from '@mui/material/Container';
 import SearchBar from '@/src/components/SearchBar';
 
-
 export default function HomeContent() {
   const router = useRouter();
   const { addItem } = useCart();

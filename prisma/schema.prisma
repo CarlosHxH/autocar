@@ -53,7 +53,7 @@ model Account {
  
   @@id([provider, providerAccountId])
 }
- 
+
 model Session {
   sessionToken String   @unique
   userId       String

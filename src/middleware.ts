@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { auth } from '@/auth';
-//export { auth as middleware } from './auth';
+import { apiAuthMiddleware } from './middleware/api';
 
 export async function middleware(request: NextRequest) {
+  // Handle API routes first
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    return apiAuthMiddleware(request);
+  }
+
+  // Handle web routes
   const session = await auth();
 
   // Exemplo de lógica de redirecionamento
