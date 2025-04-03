@@ -2,11 +2,10 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import type { Provider } from 'next-auth/providers';
 import bcrypt from 'bcryptjs';
-import { credencialSignin } from '@/prisma/data';
 import { AuthError } from 'next-auth';
 import { prisma } from './prisma';
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
-
+import jwt from 'jsonwebtoken';
 
 const providers: Provider[] = [
   Credentials({
@@ -21,7 +20,23 @@ const providers: Provider[] = [
       if(!user) throw new AuthError('Usuário não encontrado', {type: 'CredentialsSignin', message: 'Usuário não encontrado'});
       const passwd = bcrypt.compareSync(c.password as string, user?.password || '');
       if(!passwd) throw new AuthError('Senha inválida', {type: 'CredentialsSignin', message: 'Senha inválida'});
-      return user;
+
+      // Generate API token
+      const apiToken = jwt.sign(
+        { 
+          userId: user.id,
+          email: user.email,
+          role: user.role
+        },
+        process.env.AUTH_SECRET || 'KnTdIVqfwV2XlZJ0vLI5CHlW5iCfobiuk7hcHEyIhYE=',
+        { expiresIn: '30d' }
+      );
+      console.log({apiToken})
+      // Add API token to user object
+      return {
+        ...user,
+        apiToken
+      };
     },
   }),
 ];
@@ -48,7 +63,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     jwt({ token, user }) {
       if (user && 'role' in user) {
-        token.role = user.role as string;
+        token.role = user.role;
       }
       return token;
     },
@@ -56,7 +71,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user = {
           ...session.user,
-          role: token.role as string
+          role: token.role
         } as any;
       }
       return session;
@@ -72,12 +87,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     debug(code, ...message) {
       //console.debug(code, message)
     }
-  },
+  },/*
+  jwt: {
+    encode: async ({ token, secret }) => {
+      return jwt.sign(token || {}, secret as string, { expiresIn: '1h' });
+    },
+    decode: async ({ token, secret }) => {
+      if (!token) return null;
+      return jwt.verify(token, secret as string) as JWT;
+    }
+  },*/
   session: {
     strategy: "jwt",
     maxAge: 1 * 24 * 60 * 60,
   },
   debug: true,
 });
-
-

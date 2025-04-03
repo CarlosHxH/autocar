@@ -20,12 +20,14 @@ async function main() {
       email: 'admin@prisma.io',
       password: bcrypt.hashSync('admin', 12),
       role: 'ADMIN',
+      image:'https://avatars.githubusercontent.com/u/110472397?v=4&size=40'
     },
     create: {
       name: 'Admin',
       email: 'admin@prisma.io',
       password: bcrypt.hashSync('admin', 12),
       role: 'ADMIN',
+      image:'https://avatars.githubusercontent.com/u/110472397?v=4&size=40'
     },
   });
   console.log({ user });
