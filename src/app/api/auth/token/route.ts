@@ -61,6 +61,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!process.env.AUTH_SECRET) {
+      throw new Error('AUTH_SECRET environment variable is not set');
+    }
+
     // Generate API token
     const apiToken = jwt.sign(
       {
@@ -68,7 +72,7 @@ export async function POST(request: NextRequest) {
         email: user.email,
         role: user.role
       },
-      process.env.AUTH_SECRET || 'KnTdIVqfwV2XlZJ0vLI5CHlW5iCfobiuk7hcHEyIhYE=',
+      process.env.AUTH_SECRET,
       { expiresIn: '30d' }
     );
 
@@ -97,11 +101,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Token não fornecido' }, { status: 401 });
     }
 
+    if (!process.env.AUTH_SECRET) {
+      throw new Error('AUTH_SECRET environment variable is not set');
+    }
+
     const token = authHeader.split(' ')[1];
     
     const decoded = jwt.verify(
       token,
-      process.env.AUTH_SECRET || 'KnTdIVqfwV2XlZJ0vLI5CHlW5iCfobiuk7hcHEyIhYE='
+      process.env.AUTH_SECRET,
     ) as { userId: string; email: string; role: string };
 
     const user = await prisma.user.findUnique({

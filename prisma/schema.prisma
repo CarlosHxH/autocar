@@ -9,6 +9,7 @@ datasource db {
 
 model User {
   id            String          @id @default(cuid())
+  identifier    String?         @unique
   email         String          @unique
   name          String?
   createdAt     DateTime        @default(now())
@@ -57,7 +58,7 @@ model VerificationToken {
   token      String
   expires    DateTime
 
-  @@id([identifier, token])
+  @@id([identifier])
 }
 
 model Authenticator {

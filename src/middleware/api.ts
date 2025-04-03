@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 
 export async function apiAuthMiddleware(request: NextRequest) {
   // Skip middleware for non-API routes
+  
   if (!request.nextUrl.pathname.startsWith('/api/')) {
     return NextResponse.next();
   }
@@ -28,7 +29,7 @@ export async function apiAuthMiddleware(request: NextRequest) {
     headers.set('x-user-id', decoded.userId);
     headers.set('x-user-email', decoded.email);
     headers.set('x-user-role', decoded.role);
-
+    console.log({headers});
     return NextResponse.next({request: { headers }});
   } catch (error) {
     return NextResponse.json(

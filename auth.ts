@@ -17,21 +17,33 @@ const providers: Provider[] = [
       const user = await prisma.user.findFirst({
         where: { email: c.email as string}
       });
+      
       if(!user) throw new AuthError('Usuário não encontrado', {type: 'CredentialsSignin', message: 'Usuário não encontrado'});
       const passwd = bcrypt.compareSync(c.password as string, user?.password || '');
       if(!passwd) throw new AuthError('Senha inválida', {type: 'CredentialsSignin', message: 'Senha inválida'});
 
+      if (!process.env.AUTH_SECRET) {
+        throw new Error('AUTH_SECRET environment variable is not set');
+      }
       // Generate API token
       const apiToken = jwt.sign(
-        { 
+        {
           userId: user.id,
           email: user.email,
           role: user.role
         },
-        process.env.AUTH_SECRET || 'KnTdIVqfwV2XlZJ0vLI5CHlW5iCfobiuk7hcHEyIhYE=',
+        process.env.AUTH_SECRET,
         { expiresIn: '30d' }
       );
-      console.log({apiToken})
+
+      const autoValidate = await prisma.verificationToken.upsert({
+        where: {  identifier: user.email },
+        update: { token: apiToken, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
+        create: { identifier: user.email, token: apiToken, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) }
+      });
+      console.log('====================================');
+      console.log({autoValidate});
+      console.log('====================================');
       // Add API token to user object
       return {
         ...user,
@@ -52,7 +64,7 @@ export const providerMap = providers.map((provider) => {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers,
   adapter: PrismaAdapter(prisma),
-  secret: process.env.AUTH_SECRET || 'KnTdIVqfwV2XlZJ0vLI5CHlW5iCfobiuk7hcHEyIhYE=',
+  secret: process.env.AUTH_SECRET,
   pages: { signIn: '/auth/signin' },
   callbacks: {
     authorized({ auth: session, request: { nextUrl } }) {
