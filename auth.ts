@@ -15,6 +15,7 @@ export const env = {
     return process.env.AUTH_SECRET
   }
 }
+
 export const decoded = (token: string)=>jwt.verify(
   token,
   env.AUTH_SECRET,
