@@ -7,6 +7,29 @@ import { prisma } from './prisma';
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import jwt from 'jsonwebtoken';
 
+export const env = {
+  get AUTH_SECRET(){
+    if (!process.env.AUTH_SECRET) {
+      throw new Error('AUTH_SECRET environment variable is not set');
+    }
+    return process.env.AUTH_SECRET
+  }
+}
+export const decoded = (token: string)=>jwt.verify(
+  token,
+  env.AUTH_SECRET,
+) as { userId: string; email: string; role: string };
+
+export const encoded = (user: any)=>jwt.sign(
+  {
+    userId: user.id,
+    email: user.email,
+    role: user.role
+  },
+  env.AUTH_SECRET,
+  { expiresIn: '30d' }
+);
+
 const providers: Provider[] = [
   Credentials({
     credentials: {
@@ -17,14 +40,11 @@ const providers: Provider[] = [
       const user = await prisma.user.findFirst({
         where: { email: c.email as string}
       });
-      
+
       if(!user) throw new AuthError('Usuário não encontrado', {type: 'CredentialsSignin', message: 'Usuário não encontrado'});
       const passwd = bcrypt.compareSync(c.password as string, user?.password || '');
       if(!passwd) throw new AuthError('Senha inválida', {type: 'CredentialsSignin', message: 'Senha inválida'});
 
-      if (!process.env.AUTH_SECRET) {
-        throw new Error('AUTH_SECRET environment variable is not set');
-      }
       // Generate API token
       const apiToken = jwt.sign(
         {
@@ -32,7 +52,7 @@ const providers: Provider[] = [
           email: user.email,
           role: user.role
         },
-        process.env.AUTH_SECRET,
+        env.AUTH_SECRET,
         { expiresIn: '30d' }
       );
 
@@ -41,9 +61,6 @@ const providers: Provider[] = [
         update: { token: apiToken, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
         create: { identifier: user.email, token: apiToken, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) }
       });
-      console.log('====================================');
-      console.log({autoValidate});
-      console.log('====================================');
       // Add API token to user object
       return {
         ...user,
