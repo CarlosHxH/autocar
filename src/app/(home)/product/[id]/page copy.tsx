@@ -1,7 +1,21 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Container, Grid, Typography, Button, Box, Rating, Divider, Chip,Select,MenuItem,SelectChangeEvent,ImageList,ImageListItem } from '@mui/material';
+import { 
+  Container, 
+  Grid, 
+  Typography, 
+  Button, 
+  Box, 
+  Rating, 
+  Divider, 
+  Chip,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  ImageList,
+  ImageListItem
+} from '@mui/material';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -9,31 +23,103 @@ import { useCart } from 'react-use-cart';
 import { useParams } from 'next/navigation';
 import useSWR from 'swr';
 
+interface ProductVariant {
+  color: string;
+  size: string;
+}
+
+interface ProductSpecifications {
+  [key: string]: string | number;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  discount?: number;
+  rating: number;
+  inStock: boolean;
+  mainImage: string;
+  additionalImages: string[];
+  variants?: ProductVariant[];
+  specifications: ProductSpecifications;
+}
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
+
 const ProductDetailsPage = () => {
   const params = useParams();
-  const id = params.id as string;
-  const { data: product } = useSWR(`/api/products/${id}`)
-  
-  console.log({product})
-  if(!product) return null;
-  
-  const [selectedImage, setSelectedImage] = useState('');
-  const [selectedVariant, setSelectedVariant] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const id = params?.id as string;
 
-  useEffect(()=>{setSelectedImage(product?.mainImage)},[product])
+  const { data: product, error, isLoading } = useSWR<Product>(
+    id ? `/api/products/${id}` : null,
+    fetcher
+  );
+  
+  const [selectedImage, setSelectedImage] = useState<string>('');
+  const [selectedVariant, setSelectedVariant] = useState<number>(0);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
-  const { addItem, getItem } = useCart();
+  const { addItem } = useCart();
+
+  // Update selected image when product data is loaded
+  useEffect(() => {
+    if (product?.mainImage) {
+      setSelectedImage(product.mainImage);
+    }
+  }, [product]);
+
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography variant="h4">Carregando produto...</Typography>
+      </Container>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography variant="h4">Erro ao carregar o produto</Typography>
+      </Container>
+    );
+  }
+
+  // Handle product not found
+  if (!product) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography variant="h4">Produto não encontrado</Typography>
+      </Container>
+    );
+  }
 
   const handleVariantChange = (event: SelectChangeEvent) => {
     setSelectedVariant(Number(event.target.value));
   };
 
   const calculateDiscountedPrice = () => {
-    const originalPrice = product?.price;
-    return product?.discount 
+    const originalPrice = product.price;
+    return product.discount 
       ? originalPrice * (1 - product.discount / 100) 
       : originalPrice;
+  };
+
+  const handleAddToCart = () => {
+    // If the product has variants, add the selected variant
+    if (product.variants && product.variants.length > 0) {
+      const variant = product.variants[selectedVariant];
+      addItem({
+        ...product,
+        id: `${product.id}-${selectedVariant}`,
+        variantInfo: variant
+      }, 1);
+    } else {
+      addItem(product, 1);
+    }
   };
 
   return (
@@ -49,7 +135,7 @@ const ProductDetailsPage = () => {
             {/* Main Image */}
             <img 
               src={selectedImage} 
-              alt={product?.name}
+              alt={product.name}
               style={{
                 width: '100%',
                 height: '100%',
@@ -74,7 +160,7 @@ const ProductDetailsPage = () => {
             </Button>
 
             {/* Discount Chip */}
-            {product?.discount && (
+            {product.discount && product.discount > 0 && (
               <Chip 
                 label={`-${product.discount}%`} 
                 color="error" 
@@ -95,18 +181,39 @@ const ProductDetailsPage = () => {
             }} 
             cols={3}
           >
-            {product?.images.map((img: string) => (
+            {product.mainImage && (
               <ImageListItem 
-                key={img}
+                onClick={() => setSelectedImage(product.mainImage)}
+                sx={{ 
+                  cursor: 'pointer',
+                  border: selectedImage === product.mainImage ? '2px solid' : 'none',
+                  borderColor: 'primary.main'
+                }}
+              >
+                <img 
+                  src={product.mainImage} 
+                  alt="Product Main Image"
+                  style={{
+                    width: '100%',
+                    height: 100,
+                    objectFit: 'contain'
+                  }}
+                />
+              </ImageListItem>
+            )}
+            {product.additionalImages && product.additionalImages.map((img: string, index: number) => (
+              <ImageListItem 
+                key={`${img}-${index}`}
                 onClick={() => setSelectedImage(img)}
                 sx={{ 
                   cursor: 'pointer',
-                  border: selectedImage === img ? '2px solid primary.main' : 'none'
+                  border: selectedImage === img ? '2px solid' : 'none',
+                  borderColor: 'primary.main'
                 }}
               >
                 <img 
                   src={img} 
-                  alt="Product Thumbnail"
+                  alt={`Product Thumbnail ${index + 1}`}
                   style={{
                     width: '100%',
                     height: 100,
@@ -121,22 +228,22 @@ const ProductDetailsPage = () => {
         {/* Product Details */}
         <Grid item xs={12} md={6}>
           <Typography variant="h4" gutterBottom>
-            {product?.name}
+            {product.name}
           </Typography>
 
           {/* Rating and Stock */}
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Rating 
-              value={product?.rating} 
+              value={product.rating} 
               precision={0.5} 
               readOnly 
             />
             <Typography variant="body2" sx={{ ml: 2 }}>
-              ({product?.rating} de 5)
+              ({product.rating} de 5)
             </Typography>
             <Chip 
-              label={product?.inStock ? "Em Estoque" : "Esgotado"}
-              color={product?.inStock ? "success" : "error"}
+              label={product.inStock ? "Em Estoque" : "Esgotado"}
+              color={product.inStock ? "success" : "error"}
               size="small"
               sx={{ ml: 2 }}
             />
@@ -149,9 +256,9 @@ const ProductDetailsPage = () => {
               color="primary" 
               sx={{ fontWeight: 'bold', mr: 2 }}
             >
-              R$ {calculateDiscountedPrice()?.toFixed(2)}
+              R$ {calculateDiscountedPrice().toFixed(2)}
             </Typography>
-            {product?.discount && product?.discount > 0 && (
+            {product.discount && product.discount > 0 && (
               <Typography 
                 variant="body2" 
                 sx={{ 
@@ -159,13 +266,13 @@ const ProductDetailsPage = () => {
                   color: 'gray' 
                 }}
               >
-                R$ {product?.price.toFixed(2)}
+                R$ {product.price.toFixed(2)}
               </Typography>
             )}
           </Box>
 
           {/* Variants Selector */}
-          {product?.variants && (
+          {product.variants && product.variants.length > 0 && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1" gutterBottom>
                 Variante
@@ -175,7 +282,7 @@ const ProductDetailsPage = () => {
                 value={selectedVariant.toString()}
                 onChange={handleVariantChange}
               >
-                {product.variants.map((variant: any, index: number) => (
+                {product.variants.map((variant: ProductVariant, index: number) => (
                   <MenuItem key={index} value={index}>
                     {variant.color} - {variant.size}
                   </MenuItem>
@@ -186,7 +293,7 @@ const ProductDetailsPage = () => {
 
           {/* Description */}
           <Typography variant="body1" paragraph>
-            {product?.description}
+            {product.description}
           </Typography>
 
           {/* Specifications */}
@@ -206,7 +313,7 @@ const ProductDetailsPage = () => {
               }}
             >
               <Typography variant="body2">{key}</Typography>
-              <Typography variant="body2" fontWeight="bold">{value as string}</Typography>
+              <Typography variant="body2" fontWeight="bold">{String(value)}</Typography>
             </Box>
           ))}
 
@@ -219,7 +326,7 @@ const ProductDetailsPage = () => {
               fullWidth
               disabled={!product.inStock}
               startIcon={<LocalShippingIcon />}
-              onClick={() => addItem(product, 1)}
+              onClick={handleAddToCart}
             >
               Adicionar ao Carrinho
             </Button>

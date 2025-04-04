@@ -88,9 +88,9 @@ model Product {
   isPromotion      Boolean                @default(false)
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
-  mainImage        String
+  image            String
   OrderItem        OrderItem[]
-  additionalImages ProductImage[]
+  images           ProductImage[]
   specifications   ProductSpecification[]
   variants         ProductVariant[]
 }

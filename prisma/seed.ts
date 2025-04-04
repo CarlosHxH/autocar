@@ -37,7 +37,7 @@ async function main() {
       name: 'Volante Esportivo Polo Fox Voyage Gol G2 G3 G4 Santana Parati Gol G7 Golf Tsi Vw',
       price: 299.99,
       description: 'Advanced automotive component designed for optimal performance and durability. Engineered with precision to enhance your vehicle\'s efficiency and reliability.',
-      mainImage: 'https://cdn.iset.io/assets/02462/produtos/3743/16022016132004_zoom.jpg',
+      image: 'https://cdn.iset.io/assets/02462/produtos/3743/16022016132004_zoom.jpg',
       rating: 4.5,
       inStock: true,
       discount: 15,
@@ -64,7 +64,7 @@ async function main() {
       name: 'Kit Borrachas Vedação Universal',
       price: 199.99,
       description: 'High-quality universal sealing rubber kit for multiple applications.',
-      mainImage: 'https://www.aracacentercar.com.br/fx-files/images/big/plgProducts-vo1yp5lyf0.jpg',
+      image: 'https://www.aracacentercar.com.br/fx-files/images/big/plgProducts-vo1yp5lyf0.jpg',
       rating: 4.5,
       inStock: true,
       discount: 15,
@@ -91,7 +91,7 @@ async function main() {
       name: 'Kit Embreagem Renault Master',
       price: 399.99,
       description: 'Complete clutch kit for Renault Master vehicles, offering smooth gear transitions and extended durability.',
-      mainImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSt8n930KKHO17MQaFowVgJJvkvmXT6hVzUWQ&s',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSt8n930KKHO17MQaFowVgJJvkvmXT6hVzUWQ&s',
       rating: 4.7,
       inStock: true,
       discount: 10,
@@ -117,7 +117,7 @@ async function main() {
       name: 'Escape Esportivo Traseiro Gol G5 G6 G7',
       price: 249.99,
       description: 'Performance sport exhaust for Volkswagen Gol G5, G6, and G7 models, delivering enhanced sound and improved throttle response.',
-      mainImage: 'https://http2.mlstatic.com/D_NQ_NP_625710-MLB71281640981_082023-O-escapamento-silencioso-traseiro-gol-g5-g6-10-2008-em-diante.webp',
+      image: 'https://http2.mlstatic.com/D_NQ_NP_625710-MLB71281640981_082023-O-escapamento-silencioso-traseiro-gol-g5-g6-10-2008-em-diante.webp',
       rating: 4.3,
       inStock: true,
       discount: 15,
@@ -144,7 +144,7 @@ async function main() {
       name: 'Filtro de Ar Tecfil Arl4161',
       price: 59.99,
       description: 'High-performance air filter ensuring optimal engine breathing and protection from contaminants.',
-      mainImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAn-ScxJ7tBm3H9DhOjfqpVOz6SDV-Re3HHA&s',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAn-ScxJ7tBm3H9DhOjfqpVOz6SDV-Re3HHA&s',
       rating: 4.8,
       inStock: true,
       discount: 5,
@@ -170,7 +170,7 @@ async function main() {
       name: 'Filtro de Ar Esportivo Mono Fluxo Preto Polo Fox Voyage G5 G6 G7',
       price: 129.99,
       description: 'Sport performance air filter offering increased airflow and improved engine response for Volkswagen models.',
-      mainImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9G4dN6WnoUCplOqFk6Yh-Pe3XbY64bgAUaw&s',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9G4dN6WnoUCplOqFk6Yh-Pe3XbY64bgAUaw&s',
       rating: 4.6,
       inStock: true,
       discount: 20,
@@ -203,7 +203,7 @@ async function main() {
         name: productData.name,
         price: productData.price,
         description: productData.description,
-        mainImage: productData.mainImage,
+        image: productData.image,
         rating: productData.rating,
         inStock: productData.inStock,
         discount: productData.discount,
@@ -240,7 +240,7 @@ async function main() {
     // Create additional images
     for (const imageUrl of productData.images) {
       // Skip the main image if it's in the images array to avoid duplication
-      if (imageUrl !== productData.mainImage) {
+      if (imageUrl !== productData.image) {
         await prisma.productImage.create({
           data: {
             url: imageUrl,
