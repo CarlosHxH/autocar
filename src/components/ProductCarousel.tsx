@@ -104,7 +104,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, title = "Pr
             <CardMedia
               component="img"
               height="160"
-              image={product.mainImage}
+              image={product.image}
               alt={product.name}
               sx={{ objectFit: 'contain', backgroundColor: '#f5f5f5', p: 1 }}
             />

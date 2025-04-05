@@ -54,11 +54,9 @@ model Session {
 }
 
 model VerificationToken {
-  identifier String
+  identifier String   @id
   token      String
   expires    DateTime
-
-  @@id([identifier])
 }
 
 model Authenticator {
@@ -76,23 +74,23 @@ model Authenticator {
 }
 
 model Product {
-  id               String                 @id
-  name             String
-  price            Float
-  description      String
-  category         String?
-  code             String?
-  rating           Float
-  inStock          Boolean                @default(true)
-  discount         Int                    @default(0)
-  isPromotion      Boolean                @default(false)
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
-  image            String
-  OrderItem        OrderItem[]
-  images           ProductImage[]
-  specifications   ProductSpecification[]
-  variants         ProductVariant[]
+  id             String                 @id
+  name           String
+  price          Float
+  description    String
+  category       String?
+  code           String?
+  rating         Float
+  inStock        Boolean                @default(true)
+  discount       Int                    @default(0)
+  isPromotion    Boolean                @default(false)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  image          String
+  images         ProductImage[]
+  OrderItem      OrderItem[]
+  specifications ProductSpecification[]
+  variants       ProductVariant[]
 }
 
 model ProductSpecification {
@@ -137,18 +135,18 @@ model Address {
 }
 
 model OrderItem {
-  id        String   @id @default(uuid())
-  orderId   String
-  productId String
-  quantity  Int
-  price     Float
-  discount  Int
-  total     Float
+  id          String   @id @default(uuid())
+  orderId     String
+  productId   String
+  quantity    Int
+  price       Float
+  discount    Int
+  total       Float
   description String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model Order {
@@ -164,6 +162,15 @@ model Order {
   OrderItem   OrderItem[]
 }
 
+model BannerImages {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  images      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 enum OrderStatus {
   PENDING
   CONFIRMED
@@ -177,13 +184,4 @@ enum Role {
   USER
   ADMIN
   SUPERADMIN
-}
-
-model BannerImages {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  images      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 }

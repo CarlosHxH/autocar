@@ -1,6 +1,5 @@
 import React from 'react';
 import { Card, CardMedia, CardContent, Typography, Button, Box, Rating, Chip } from '@mui/material';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 interface ProductCardProps {
   name: string;

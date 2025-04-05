@@ -1,36 +1,39 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Container, Grid, Typography, Button, Box, Rating, Divider, Chip,Select,MenuItem,SelectChangeEvent,ImageList,ImageListItem } from '@mui/material';
+import { Container, Grid, Typography, Button, Box, Rating, Divider, Chip, Select, MenuItem, SelectChangeEvent, ImageList, ImageListItem } from '@mui/material';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useCart } from 'react-use-cart';
 import { useParams } from 'next/navigation';
 import useSWR from 'swr';
+import { fetcher } from '@/lib/apiFetch';
 
 const ProductDetailsPage = () => {
   const params = useParams();
   const id = params.id as string;
-  const { data: product } = useSWR(`/api/products/${id}`)
-  
-  console.log({product})
-  if(!product) return null;
+  const { data: product } = useSWR(`/api/products/${id}`, fetcher);
   
   const [selectedImage, setSelectedImage] = useState('');
-  const [selectedVariant, setSelectedVariant] = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState('0');
   const [isFavorite, setIsFavorite] = useState(false);
+  const { addItem } = useCart();
+  
+  useEffect(() => {
+    if (product?.image) {
+      setSelectedImage(product.image);
+    }
+  }, [product]);
 
-  useEffect(()=>{setSelectedImage(product?.mainImage)},[product])
-
-  const { addItem, getItem } = useCart();
+  if (!product) return null;
 
   const handleVariantChange = (event: SelectChangeEvent) => {
-    setSelectedVariant(Number(event.target.value));
+    setSelectedVariant(event.target.value);
   };
 
   const calculateDiscountedPrice = () => {
-    const originalPrice = product?.price;
+    const originalPrice = product?.price || 0;
     return product?.discount 
       ? originalPrice * (1 - product.discount / 100) 
       : originalPrice;
@@ -48,8 +51,8 @@ const ProductDetailsPage = () => {
           }}>
             {/* Main Image */}
             <img 
-              src={selectedImage} 
-              alt={product?.name}
+              src={selectedImage || product.image} 
+              alt={product?.name || "Product Image"}
               style={{
                 width: '100%',
                 height: '100%',
@@ -74,7 +77,7 @@ const ProductDetailsPage = () => {
             </Button>
 
             {/* Discount Chip */}
-            {product?.discount && (
+            {product?.discount > 0 && (
               <Chip 
                 label={`-${product.discount}%`} 
                 color="error" 
@@ -95,18 +98,19 @@ const ProductDetailsPage = () => {
             }} 
             cols={3}
           >
-            {product?.images.map((img: string) => (
+            {product?.images?.map((img: string, index: number) => (
               <ImageListItem 
-                key={img}
+                key={index}
                 onClick={() => setSelectedImage(img)}
                 sx={{ 
                   cursor: 'pointer',
-                  border: selectedImage === img ? '2px solid primary.main' : 'none'
+                  border: selectedImage === img ? '2px solid' : 'none',
+                  borderColor: selectedImage === img ? 'primary.main' : 'transparent'
                 }}
               >
                 <img 
                   src={img} 
-                  alt="Product Thumbnail"
+                  alt={`Product Thumbnail ${index + 1}`}
                   style={{
                     width: '100%',
                     height: 100,
@@ -127,12 +131,12 @@ const ProductDetailsPage = () => {
           {/* Rating and Stock */}
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Rating 
-              value={product?.rating} 
+              value={product?.rating || 0} 
               precision={0.5} 
               readOnly 
             />
             <Typography variant="body2" sx={{ ml: 2 }}>
-              ({product?.rating} de 5)
+              ({product?.rating || 0} de 5)
             </Typography>
             <Chip 
               label={product?.inStock ? "Em Estoque" : "Esgotado"}
@@ -149,9 +153,9 @@ const ProductDetailsPage = () => {
               color="primary" 
               sx={{ fontWeight: 'bold', mr: 2 }}
             >
-              R$ {calculateDiscountedPrice()?.toFixed(2)}
+              R$ {calculateDiscountedPrice().toFixed(2)}
             </Typography>
-            {product?.discount && product?.discount > 0 && (
+            {product?.discount > 0 && (
               <Typography 
                 variant="body2" 
                 sx={{ 
@@ -159,24 +163,24 @@ const ProductDetailsPage = () => {
                   color: 'gray' 
                 }}
               >
-                R$ {product?.price.toFixed(2)}
+                R$ {product?.price?.toFixed(2)}
               </Typography>
             )}
           </Box>
 
           {/* Variants Selector */}
-          {product?.variants && (
+          {product?.variants && product.variants.length > 0 && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1" gutterBottom>
                 Variante
               </Typography>
               <Select
                 fullWidth
-                value={selectedVariant.toString()}
+                value={selectedVariant}
                 onChange={handleVariantChange}
               >
                 {product.variants.map((variant: any, index: number) => (
-                  <MenuItem key={index} value={index}>
+                  <MenuItem key={index} value={index.toString()}>
                     {variant.color} - {variant.size}
                   </MenuItem>
                 ))}
@@ -194,7 +198,7 @@ const ProductDetailsPage = () => {
           <Typography variant="h6" gutterBottom>
             Especificações
           </Typography>
-          {Object.entries(product.specifications).map(([key, value]) => (
+          {product?.specifications && Object.entries(product.specifications).map(([key, value]) => (
             <Box 
               key={key} 
               sx={{ 
@@ -206,7 +210,7 @@ const ProductDetailsPage = () => {
               }}
             >
               <Typography variant="body2">{key}</Typography>
-              <Typography variant="body2" fontWeight="bold">{value as string}</Typography>
+              <Typography variant="body2" fontWeight="bold">{String(value)}</Typography>
             </Box>
           ))}
 

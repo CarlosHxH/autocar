@@ -5,9 +5,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     try {
     const id = (await params).id;
     const data = await prisma.product.findUnique({
-      where: {
-        id: "prod-463193-4696"
-      },
+      where: { id },
       include: {
         images: true,
         specifications: true,
