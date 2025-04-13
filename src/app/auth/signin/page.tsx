@@ -5,13 +5,12 @@ import Alert from '@mui/material/Alert';
 import { SignInPage } from '@toolpad/core/SignInPage';
 import { providerMap } from '@/auth';
 import signIn from './actions';
+import { Box } from '@mui/material';
 
 function ForgotPasswordLink() {
   return (
     <span>
-      <Link fontSize="0.75rem" href="/auth/forgot-password">
-        Forgot password?
-      </Link>
+      <Link fontSize="0.75rem" href="/auth/forgot-password">Esqueceu sua senha?</Link>
     </span>
   );
 }
@@ -19,18 +18,21 @@ function ForgotPasswordLink() {
 function SignUpLink() {
   return (
     <span style={{ fontSize: '0.8rem' }}>
-      Don&apos;t have an account?&nbsp;<Link href="/auth/signup">Sign up</Link>
+      Não tem uma conta? <Link href="/auth/signup">Inscreva-se</Link>
     </span>
   );
 }
 
-function DemoInfo() {
+function Title() {
   return (
-    <Alert severity="info">
-      You can use <strong>demo@mui.com</strong> with the password <strong>@demo1</strong> to
-      test
-    </Alert>
+    <Box sx={{mb:5}}></Box>
   );
+}
+
+function SubTitle() {
+  return(
+    <Box>Bem-vindo, faça login para continuar</Box>
+  )
 }
 
 export default function SignIn() {
@@ -41,7 +43,8 @@ export default function SignIn() {
       slots={{
         forgotPasswordLink: ForgotPasswordLink,
         signUpLink: SignUpLink,
-        subtitle: DemoInfo,
+        title: Title,
+        subtitle: SubTitle,
       }}
     />
   );

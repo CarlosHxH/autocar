@@ -1,8 +1,9 @@
-// src/components/Cart.tsx
+"use client"
 import React from 'react';
 import { Drawer, Box, Typography, IconButton, List, ListItem, ListItemAvatar, Avatar, ListItemText, Button, Divider, ButtonGroup, TextField } from '@mui/material';
 import { Close as CloseIcon, Add as AddIcon, Remove as RemoveIcon, Delete as DeleteIcon, ShoppingCart as ShoppingCartIcon } from '@mui/icons-material';
 import { useCart } from 'react-use-cart';
+import { useRouter } from 'next/navigation';
 
 interface CartItem {
   id: string;
@@ -21,9 +22,14 @@ interface CartProps {
 }
 
 export default function Cart({ open, onClose, items, onUpdateQuantity, onRemoveItem }: CartProps) {
+  const route = useRouter();
   const { cartTotal } = useCart()
-  // const totalPrice = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
+  const checkout = () => {
+    onClose();
+
+    route.push("/checkout");
+  }
   return (
     <Drawer
       anchor="right"
@@ -81,9 +87,9 @@ export default function Cart({ open, onClose, items, onUpdateQuantity, onRemoveI
                   disablePadding
                 >
                   <ListItemAvatar>
-                    <Avatar variant="rounded" src={item.image} alt={item.name} sx={{ width: 60, height: 60, mr: 1 }} />
+                    <Avatar variant="rounded" src={item.image} alt={item.name} sx={{ width: 70, height: 70, mr: 1, p:1 }} />
                   </ListItemAvatar>
-                  <ListItemText id={item.id} primary={item.name} secondary={`R$ ${item.price.toFixed(2)}`} sx={{ ml: 1, maxWidth:200 }} />
+                  <ListItemText id={item.id} primary={item.name} secondary={`R$ ${item.price.toFixed(2)}`} sx={{ ml: 1, maxWidth: 200 }} />
                 </ListItem>
                 <Divider />
               </React.Fragment>
@@ -110,7 +116,7 @@ export default function Cart({ open, onClose, items, onUpdateQuantity, onRemoveI
                 R$ {cartTotal.toFixed(2)}
               </Typography>
             </Box>
-            <Button variant="contained" fullWidth size="large" sx={{ backgroundColor: '#1a237e', '&:hover': { backgroundColor: '#000051' } }}>
+            <Button onClick={checkout} variant="contained" fullWidth size="large" sx={{ backgroundColor: '#1a237e', '&:hover': { backgroundColor: '#000051' } }}>
               Finalizar Compra
             </Button>
             <Button variant="outlined" fullWidth size="large" sx={{ mt: 1, borderColor: '#1a237e', color: '#1a237e' }} onClick={onClose}>
