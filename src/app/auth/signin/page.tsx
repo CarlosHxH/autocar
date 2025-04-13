@@ -57,8 +57,6 @@ const StyledTabs = styled(Tabs)(({ theme }) => ({
 }));
 
 const Auth: NextPage = () => {
-  const { data: session } = useSession()
-  const route = useRouter();
   const [error, setError] = useState('');
   const [isloading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -69,10 +67,6 @@ const Auth: NextPage = () => {
     password: ''
   });
 
-  if(session) {
-    route.push('/');
-    return <></>;
-  }
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setError("");
@@ -96,7 +90,6 @@ const Auth: NextPage = () => {
     setLoading(true)
     try {
       const res = await signIn({id:'credentials',name:'Credentials'}, formData);
-      if(!res.error) route.push('/');
       setError(res.error)
     } catch (error: any) {
       setError(error.message)
@@ -111,7 +104,6 @@ const Auth: NextPage = () => {
     setLoading(true)
     try {
       const res = await signIn({id:'register',name:'Register'}, formData );
-      if(!res.error) route.push('/');
       setError(res.error)
     } catch (error: any) {
       setError(error.message)
