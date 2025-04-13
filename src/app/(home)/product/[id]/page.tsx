@@ -98,18 +98,18 @@ const ProductDetailsPage = () => {
             }} 
             cols={3}
           >
-            {product?.images?.map((img: string, index: number) => (
+            {[{url: product.image},...product?.images]?.map((img: {[x:string]:string}, index: number) => (
               <ImageListItem 
                 key={index}
-                onClick={() => setSelectedImage(img)}
-                sx={{ 
+                onClick={() => setSelectedImage(img.url)}
+                sx={{
                   cursor: 'pointer',
-                  border: selectedImage === img ? '2px solid' : 'none',
-                  borderColor: selectedImage === img ? 'primary.main' : 'transparent'
+                  border: selectedImage === img.url ? '2px solid' : 'none',
+                  borderColor: selectedImage === img.url ? 'primary.main' : 'transparent'
                 }}
               >
                 <img 
-                  src={img} 
+                  src={img.url} 
                   alt={`Product Thumbnail ${index + 1}`}
                   style={{
                     width: '100%',
@@ -198,19 +198,13 @@ const ProductDetailsPage = () => {
           <Typography variant="h6" gutterBottom>
             Especificações
           </Typography>
-          {product?.specifications && Object.entries(product.specifications).map(([key, value]) => (
+          {product?.specifications && Object.entries(product.specifications).map(([key, value]:any) => (
             <Box 
               key={key} 
-              sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between',
-                py: 1,
-                borderBottom: '1px solid',
-                borderColor: 'divider'
-              }}
+              sx={{ display: 'flex', justifyContent: 'space-between',py: 1,borderBottom: '1px solid',borderColor: 'divider'}}
             >
-              <Typography variant="body2">{key}</Typography>
-              <Typography variant="body2" fontWeight="bold">{String(value)}</Typography>
+              <Typography variant="body2">{value.key}</Typography>
+              <Typography variant="body2" fontWeight="bold">{String(value.value)}</Typography>
             </Box>
           ))}
 
@@ -223,7 +217,7 @@ const ProductDetailsPage = () => {
               fullWidth
               disabled={!product.inStock}
               startIcon={<LocalShippingIcon />}
-              onClick={() => addItem(product, 1)}
+              onClick={() => addItem(product,1)}
             >
               Adicionar ao Carrinho
             </Button>

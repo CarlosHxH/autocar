@@ -1,6 +1,7 @@
 import * as React from 'react';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
+import { type SidebarFooterProps } from '@toolpad/core';
 
 export default function Copyright(props: any) {
   return (
@@ -21,6 +22,18 @@ export default function Copyright(props: any) {
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
+    </Typography>
+  );
+}
+
+
+export function SidebarFooter({ mini }: SidebarFooterProps) {
+  return (
+    <Typography
+      variant="caption"
+      sx={{ m: 1, whiteSpace: 'nowrap', overflow: 'hidden' }}
+    >
+      {mini ? '© CrxCode' : `© ${new Date().getFullYear()} Made with love by CrxCode`}
     </Typography>
   );
 }

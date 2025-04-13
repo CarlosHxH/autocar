@@ -1,10 +1,11 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("SHADOW_DATABASE_URL")
 }
 
 model User {
@@ -17,7 +18,7 @@ model User {
   image         String?
   updatedAt     DateTime        @updatedAt
   role          Role            @default(CUSTOMER)
-  password      String?
+  password      String
   accounts      Account[]
   addresses     Address[]
   Authenticator Authenticator[]
@@ -184,4 +185,25 @@ enum Role {
   USER
   ADMIN
   SUPERADMIN
+}
+
+
+model Footer {
+  id                  Int      @id @default(autoincrement())
+  companyName         String   // Auto Peças Express
+  companyDescription  String   // Sua loja completa de auto peças...
+  
+  // Contato
+  phone               String   // (11) 1234-5678
+  email               String   // contato@autopecasexpress.com.br
+  address             String   // Av. das Autopeças, 1000 - São Paulo/SP
+  
+  // Horário de funcionamento
+  weekdayHours        String   // Segunda a Sexta: 08:00 - 18:00
+  saturdayHours       String   // Sábado: 08:00 - 13:00
+  
+  copyrightText       String   // © 2025 Auto Peças Express. Todos os direitos reservados.
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
