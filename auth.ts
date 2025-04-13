@@ -31,44 +31,79 @@ export const encoded = (user: any)=>jwt.sign(
   { expiresIn: '30d' }
 );
 
+export async function GenerateAPIToken(user:any){
+  // Generate API token
+  const apiToken = jwt.sign(
+    {
+      userId: user.id,
+      email: user.email,
+      role: user.role
+    },
+    env.AUTH_SECRET,
+    { expiresIn: '30d' }
+  );
+  await prisma.verificationToken.upsert({
+    where: {  identifier: user.email },
+    update: { token: apiToken, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
+    create: { identifier: user.email, token: apiToken, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) }
+  });
+  return apiToken;
+}
+
 const providers: Provider[] = [
   Credentials({
+    id: "credentials",
+    name: "credentials",
     credentials: {
       email: { label: 'Email Address', type: 'email' },
       password: { label: 'Password', type: 'password' },
     },
     async authorize(c) {
-      const user = await prisma.user.findFirst({
-        where: { email: c.email as string}
-      });
+      const user = await prisma.user.findFirst({where: { email: c.email as string}});
 
       if(!user) throw new AuthError('Usuário não encontrado', {type: 'CredentialsSignin', message: 'Usuário não encontrado'});
       const passwd = bcrypt.compareSync(c.password as string, user?.password || '');
       if(!passwd) throw new AuthError('Senha inválida', {type: 'CredentialsSignin', message: 'Senha inválida'});
 
       // Generate API token
-      const apiToken = jwt.sign(
-        {
-          userId: user.id,
-          email: user.email,
-          role: user.role
-        },
-        env.AUTH_SECRET,
-        { expiresIn: '30d' }
-      );
-
-      const autoValidate = await prisma.verificationToken.upsert({
-        where: {  identifier: user.email },
-        update: { token: apiToken, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
-        create: { identifier: user.email, token: apiToken, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) }
-      });
+      const apiToken = await GenerateAPIToken(user)
       // Add API token to user object
-      return {
-        ...user,
-        apiToken
-      };
+      return { ...user, apiToken };
     },
   }),
+
+  Credentials({
+    id: "register",
+    name: "register",
+    credentials: {
+      name: { label: "Name", type: "text" },
+      email: { label: 'Email Address', type: 'email' },
+      password: { label: 'Password', type: 'password' },
+    },
+    async authorize(credencials) {
+      const { name, email, password } = credencials;
+      if (!name || !email || !password) {
+        throw new AuthError('Campos obrigatórios ausentes.', {type: 'CredentialsSignin', message: 'Campos obrigatórios ausentes.'});
+      }
+      // Check user
+      const checkUser = await prisma.user.findFirst({where: { email: email as string}});
+      if(checkUser) throw new AuthError('Email, já cadastrado.', {type: 'CredentialsSignin', message: 'Email, já cadastrado'});
+
+      const user = await prisma.user.create({
+        data: {
+          name: name as string,
+          email: email as string,
+          password: await bcrypt.hash(password as string, 12),
+        },
+      });
+
+      // Generate API token
+      const apiToken = await GenerateAPIToken(user)
+      // Add API token to user object
+      return { ...user, apiToken };
+    },
+  }),
+  
 ];
 
 export const providerMap = providers.map((provider) => {

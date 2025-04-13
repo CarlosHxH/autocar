@@ -7,11 +7,12 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import PersonIcon from '@mui/icons-material/Person';
-//import { signIn } from 'next-auth/react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 import signIn from './actions';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -56,6 +57,8 @@ const StyledTabs = styled(Tabs)(({ theme }) => ({
 }));
 
 const Auth: NextPage = () => {
+  const { data: session } = useSession()
+  const route = useRouter();
   const [error, setError] = useState('');
   const [isloading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -65,6 +68,11 @@ const Auth: NextPage = () => {
     email: '',
     password: ''
   });
+
+  if(session) {
+    route.push('/');
+    return <></>;
+  }
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -83,46 +91,32 @@ const Auth: NextPage = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("")
     setLoading(true)
     try {
-      const form = new FormData();
-      form.append('email', formData.email)
-      form.append('password', formData.password);
-      const res = await signIn({ id: 'credentials', name: 'credentials' }, form);
-      if (res.error != 'NEXT_REDIRECT') setError(res.error)
-    } catch (error) {
-    } finally {
-      setLoading(true)
-    }
+      const res = await signIn({id:'credentials',name:'Credentials'}, formData);
+      if(!res.error) route.push('/');
+      setError(res.error)
+    } catch (error: any) {
+      setError(error.message)
+    } finally { setTimeout(() => {
+      setLoading(false)
+    }, 1000); }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("")
     setLoading(true)
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        const form = new FormData();
-        form.append('email', formData.email)
-        form.append('password', formData.password);
-        const res = await signIn({ id: 'credentials', name: 'credentials' }, form);
-        if (res.error) setError(res.error)
-      } else {
-        const data = await response.json();
-        console.error('Registration failed:', data.message);
-      }
-    } catch (error) {
-      setError('Registration error: ' + error)
-    } finally {
-      setLoading(true)
-    }
+      const res = await signIn({id:'register',name:'Register'}, formData );
+      if(!res.error) route.push('/');
+      setError(res.error)
+    } catch (error: any) {
+      setError(error.message)
+    } finally { setTimeout(() => {
+      setLoading(false)
+    }, 1000); }
   };
 
   return (
@@ -139,7 +133,7 @@ const Auth: NextPage = () => {
             p: 4,
           }}
         >
-          <Image width={500} height={200} src={'/logo.png'} alt={'Logo'} style={{ height: 'auto', width: '100%' }} />
+          <Image priority width={500} height={200} src={'/logo.png'} alt={'Logo'} style={{ height: 'auto', width: '100%'}} />
           <Typography
             variant="h5"
             component="h1"
@@ -166,7 +160,7 @@ const Auth: NextPage = () => {
           </Box>
 
           <Box>
-            {error && <Alert color='error'>{error}</Alert>}
+            {error && <Alert  color='error'>{error}</Alert>}
           </Box>
 
           <TabPanel value={tabValue} index={0}>
