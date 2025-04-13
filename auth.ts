@@ -60,10 +60,9 @@ const providers: Provider[] = [
     },
     async authorize(c) {
       const user = await prisma.user.findFirst({where: { email: c.email as string}});
-
-      if(!user) throw new AuthError('Usuário não encontrado', {type: 'CredentialsSignin', message: 'Usuário não encontrado'});
+      if(!user) throw new AuthError('Credenciais inválidas', {type: 'CredentialsSignin', message: 'Credenciais inválidas.'});
       const passwd = bcrypt.compareSync(c.password as string, user?.password || '');
-      if(!passwd) throw new AuthError('Senha inválida', {type: 'CredentialsSignin', message: 'Senha inválida'});
+      if(!passwd) throw new AuthError('Credenciais inválidas', {type: 'CredentialsSignin', message: 'Credenciais inválidas.'});
 
       // Generate API token
       const apiToken = await GenerateAPIToken(user)
@@ -82,12 +81,10 @@ const providers: Provider[] = [
     },
     async authorize(credencials) {
       const { name, email, password } = credencials;
-      if (!name || !email || !password) {
-        throw new AuthError('Campos obrigatórios ausentes.', {type: 'CredentialsSignin', message: 'Campos obrigatórios ausentes.'});
-      }
+      if (!name || !email || !password) throw new AuthError('Campos obrigatórios ausentes.', {type: 'CredentialsSignin', message: 'Campos obrigatórios ausentes.'});
       // Check user
       const checkUser = await prisma.user.findFirst({where: { email: email as string}});
-      if(checkUser) throw new AuthError('Email, já cadastrado.', {type: 'CredentialsSignin', message: 'Email, já cadastrado'});
+      if(checkUser) throw new AuthError('Conta já cadastrado.', {type: 'CredentialsSignin', message: 'Conta já cadastrado'});
 
       const user = await prisma.user.create({
         data: {
@@ -103,8 +100,11 @@ const providers: Provider[] = [
       return { ...user, apiToken };
     },
   }),
-  
 ];
+
+
+
+
 
 export const providerMap = providers.map((provider) => {
   if (typeof provider === 'function') {

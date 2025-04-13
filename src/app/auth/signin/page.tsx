@@ -75,6 +75,7 @@ const Auth: NextPage = () => {
   }
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setError("");
     setTabValue(newValue);
   };
 

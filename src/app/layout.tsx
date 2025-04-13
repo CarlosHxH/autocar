@@ -4,7 +4,7 @@ import { SessionProvider, signIn, signOut } from 'next-auth/react';
 import theme, { customTheme } from '@/theme';
 import { auth } from '@/auth';
 import { NextAppProvider } from '@toolpad/core/nextjs';
-
+import { Analytics } from "@vercel/analytics/react"
 
 const AUTHENTICATION = {
   signIn,
@@ -16,6 +16,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en" data-toolpad-color-scheme="light" suppressHydrationWarning>
       <body>
+        <Analytics/>
         <SessionProvider session={session}>
           <AppRouterCacheProvider options={{ enableCssLayer: true }}>
             <NextAppProvider
