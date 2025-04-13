@@ -16,6 +16,12 @@ async function signIn(provider: AuthProvider, formData: FormData, callbackUrl?: 
         type: 'CredentialsSignin',
       };
     }
+    // The desired flow for successful sign in in all cases
+    // and unsuccessful sign in for OAuth providers will cause a `redirect`,
+    // and `redirect` is a throwing function, so we need to re-throw
+    // to allow the redirect to happen
+    // Source: https://github.com/vercel/next.js/issues/49298#issuecomment-1542055642
+    // Detect a `NEXT_REDIRECT` error and re-throw it
     if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
       throw error;
     }
