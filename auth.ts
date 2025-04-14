@@ -3,7 +3,7 @@ import Credentials from 'next-auth/providers/credentials';
 import type { Provider } from 'next-auth/providers';
 import bcrypt from 'bcryptjs';
 import { AuthError } from 'next-auth';
-import { prisma } from './prisma';
+import prisma from './prisma';
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import jwt from 'jsonwebtoken';
 
