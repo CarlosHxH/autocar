@@ -103,9 +103,10 @@ const Auth: NextPage = () => {
     } catch (error: any) {
       const errorMessage = error.message.split('Read more')[0].trim();
       setError(errorMessage)
-    } finally { setTimeout(() => {
-      setLoading(false)
-    }, 1000); }
+    } finally {
+      if(session) route.push('/');
+      setTimeout(() => {setLoading(false)}, 1000);
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -119,9 +120,9 @@ const Auth: NextPage = () => {
     } catch (error: any) {
       const errorMessage = error.message.split('Read more')[0].trim();
       setError(errorMessage)
-    } finally { setTimeout(() => {
-      setLoading(false)
-    }, 1000); }
+    } finally {
+      if(session) route.push('/');
+      setTimeout(() => {setLoading(false)}, 1000) }
   };
 
   return (
