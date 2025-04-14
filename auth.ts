@@ -67,7 +67,7 @@ const providers: Provider[] = [
       // Generate API token
       const apiToken = await GenerateAPIToken(user)
       // Add API token to user object
-      return { ...user, apiToken };
+      return { ...user, apiToken, success: true };
     },
   }),
 
@@ -97,7 +97,7 @@ const providers: Provider[] = [
       // Generate API token
       const apiToken = await GenerateAPIToken(user)
       // Add API token to user object
-      return { ...user, apiToken };
+      return { ...user, apiToken, success: true };
     },
   }),
 ];

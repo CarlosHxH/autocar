@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import jwt from 'jsonwebtoken';
+import { decoded } from '@/auth';
 
 export async function apiAuthMiddleware(request: NextRequest) {
   // Skip middleware for non-API routes
@@ -19,16 +20,13 @@ export async function apiAuthMiddleware(request: NextRequest) {
   const token = authHeader.split(' ')[1];
   
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.AUTH_SECRET || 'KnTdIVqfwV2XlZJ0vLI5CHlW5iCfobiuk7hcHEyIhYE='
-    ) as { userId: string; email: string; role: string };
-
+    const decode = await decoded(token);
+    
     // Add user info to request headers for use in API routes
     const headers = new Headers(request.headers);
-    headers.set('x-user-id', decoded.userId);
-    headers.set('x-user-email', decoded.email);
-    headers.set('x-user-role', decoded.role);
+    headers.set('x-user-id', decode.userId);
+    headers.set('x-user-email', decode.email);
+    headers.set('x-user-role', decode.role);
     console.log({headers});
     return NextResponse.next({request: { headers }});
   } catch (error) {

@@ -1,6 +1,6 @@
 "use client"
 // pages/auth/index.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Button, Container, IconButton, InputAdornment, Tab, Tabs, TextField, Typography, Alert } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
@@ -13,6 +13,7 @@ import Image from 'next/image';
 import signIn from './actions';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { AuthError } from 'next-auth';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -67,6 +68,13 @@ const Auth: NextPage = () => {
     password: ''
   });
 
+  const route = useRouter();
+  const session = useSession()
+
+  useEffect(()=>{
+    if(session) route.push('/');
+  },[session])
+
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setError("");
@@ -90,9 +98,11 @@ const Auth: NextPage = () => {
     setLoading(true)
     try {
       const res = await signIn({id:'credentials',name:'Credentials'}, formData);
-      setError(res.error)
+      if(res.error) throw new AuthError(res.error)
+        route.push('/');
     } catch (error: any) {
-      setError(error.message)
+      const errorMessage = error.message.split('Read more')[0].trim();
+      setError(errorMessage)
     } finally { setTimeout(() => {
       setLoading(false)
     }, 1000); }
@@ -104,9 +114,11 @@ const Auth: NextPage = () => {
     setLoading(true)
     try {
       const res = await signIn({id:'register',name:'Register'}, formData );
-      setError(res.error)
+      if(res.error) throw new AuthError(res.error)
+      route.push('/');
     } catch (error: any) {
-      setError(error.message)
+      const errorMessage = error.message.split('Read more')[0].trim();
+      setError(errorMessage)
     } finally { setTimeout(() => {
       setLoading(false)
     }, 1000); }

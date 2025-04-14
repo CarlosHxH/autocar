@@ -46,7 +46,7 @@ function toolbarActions() {
 function appTitle() {
   return (
     <Stack direction="row" alignItems="center" spacing={2}>
-      <Image src={"/logo.png"} width={120} height={30} alt={"Loogo"} style={{ width: 'auto' }} />
+      <Image priority src={"/logo.png"} width={120} height={30} alt={"Loogo"} style={{ width: 'auto' }} />
       <Chip size="small" label="BETA" color="info" sx={{ display: { xs: 'none', sm: 'block' } }} />
       <Tooltip title="Connected to production" sx={{ display: { xs: 'none', sm: 'block' } }}>
         <CheckCircleIcon color="success" fontSize="small" />
